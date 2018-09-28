@@ -8,26 +8,40 @@ from bpy.types import (
 #     )
 from pprint import pprint
 
-
-def del_collandobs(context, coll_name):
-    if coll_name in context.scene.collection.children:
-        coll = bpy.data.collections[coll_name]
-        for ob in coll.objects:
-            coll.objects.unlink(ob)
-        bpy.data.collections.remove(coll)
+from .utils import (
+    deselect_all,
+    delete_collection_and_objects,
+)
 
 
 def create_texts(self, context, line):
-    del_collandobs(context, line)
+    delete_collection_and_objects(context, line)
+    deselect_all(context)
+
     words = line.split(' ')
+
     collection = bpy.data.collections.new(line)
     context.scene.collection.children.link(collection)
+    # context.view_layer.collections.active = collection # TODO Does not work
+
     obs = []
     for i, word in enumerate(words):
         name = f'{i:02}' + ' ' + word
-        text_data = bpy.data.curves.new(name, 'FONT')
-        text_data.body = word
-        ob = bpy.data.objects.new(name, text_data)
+
+        # Check if object exists and can be reused
+        ob = None
+        for existing in bpy.data.objects:
+            if existing.type == 'FONT':
+                if existing.data.body == word and existing.name == name:
+                    ob = existing
+
+        # Create new Text Object
+        if not ob:
+            text_data = bpy.data.curves.new(name, 'FONT')
+            text_data.body = word
+            ob = bpy.data.objects.new(name, text_data)
+
+        # Link into Collection
         collection.objects.link(ob)
         ob.select_set(action='SELECT')
         obs.append(ob)
