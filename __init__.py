@@ -24,6 +24,7 @@ from add_text_packed_meme import op_pack_meme
 
 classes = (
     op_pack_meme.OBJECT_OT_pack_meme,
+    op_pack_meme.OBJECT_OT_add_texts,
 )
 
 
