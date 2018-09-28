@@ -14,6 +14,7 @@ if 'bpy' in locals():
     from importlib import reload
     reload(op_pack_meme)
     reload(op_create_texts)
+    reload(utils)
     reload(ui)
 
 import bpy
@@ -22,6 +23,7 @@ from add_text_packed_meme.op_create_texts import OBJECT_OT_add_texts
 from add_text_packed_meme.op_pack_meme import OBJECT_OT_pack_meme
 from add_text_packed_meme.ui import VIEW3D_MT_meme_menu
 
+from add_text_packed_meme import utils, ui
 
 classes = (
     OBJECT_OT_add_texts,

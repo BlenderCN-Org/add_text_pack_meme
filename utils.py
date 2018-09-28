@@ -1,6 +1,13 @@
 import bpy
 
 
+def active(context, ob=None):
+    if not ob:
+        return context.view_layer.objects.active
+    else:
+        context.view_layer.objects.active = ob
+
+
 def deselect_all(context):
     for ob in context.scene.collection.all_objects:
         ob.select_set('DESELECT')

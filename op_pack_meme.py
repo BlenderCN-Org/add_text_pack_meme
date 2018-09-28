@@ -7,16 +7,10 @@ from bpy.types import (
 #     FloatProperty,
 #     )
 from .utils import (
+    active,
     deselect_all,
     delete_collection_and_objects,
 )
-
-
-def active(context, ob=None):
-    if not ob:
-        return context.view_layer.objects.active
-    else:
-        context.view_layer.objects.active = ob
 
 
 def copy_as_mesh(context, coll_font):
@@ -26,19 +20,24 @@ def copy_as_mesh(context, coll_font):
     coll_mesh = bpy.data.collections.new(coll_name)
     context.scene.collection.children.link(coll_mesh)
     # Copy objects
-    new_obs = []
     for orig in coll_font.objects:
+        # Copy opbjects and data
         new_ob = bpy.data.objects[orig.name].copy()
         new_ob.data = new_ob.data.copy()
         new_ob.name = orig.name + ' - mesh'
-        new_obs.append(new_ob)
+        print('Made Copy: ', new_ob.name)
+
+        # Add new objects into new collection
         coll_mesh.objects.link(new_ob)
 
-        # Convert to Mesh
+        # Convert new objects to mesh
         active(context, new_ob)
         new_ob.select_set('SELECT')
-        orig.select_set('DESELECT')
+        # orig.select_set('DESELECT')
         bpy.ops.object.convert(target='MESH', keep_original=False)
+
+    coll_font.hide_viewport = True
+    return coll_mesh
 
 
 def pack_meme(self, context):
