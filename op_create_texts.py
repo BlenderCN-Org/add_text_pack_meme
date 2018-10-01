@@ -9,6 +9,7 @@ from bpy.types import (
 from pprint import pprint
 
 from .utils import (
+    active,
     deselect_all,
     delete_collection_and_objects,
 )
@@ -62,6 +63,54 @@ class OBJECT_OT_add_texts(Operator):
         self.lines = self.text.as_string().split('\n')
         pprint(self.lines)
         create_texts(self, context, self.lines[0])
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        self.execute(context)
+        return {'FINISHED'}
+
+
+def copy_as_mesh(self, context):
+    coll_font = context.view_layer.collections.active.collection
+    deselect_all(context)
+    coll_name = coll_font.name + ' - mesh'
+    delete_collection_and_objects(context, coll_name)
+    coll_mesh = bpy.data.collections.new(coll_name)
+    context.scene.collection.children.link(coll_mesh)
+    # Copy objects
+    for orig in coll_font.objects:
+        # Copy opbjects and data
+        new_ob = bpy.data.objects[orig.name].copy()
+        new_ob.data = new_ob.data.copy()
+        new_ob.name = orig.name + ' - mesh'
+        print('Made Copy: ', new_ob.name)
+
+        # Add new objects into new collection
+        coll_mesh.objects.link(new_ob)
+
+        # Convert new objects to mesh
+        active(context, new_ob)
+        new_ob.select_set('SELECT')
+        # orig.select_set('DESELECT')
+        bpy.ops.object.convert(target='MESH', keep_original=False)
+
+    coll_font.hide_viewport = True
+    coll_font.hide_render = True
+    return coll_mesh
+
+
+class OBJECT_OT_copy_as_mesh(Operator):
+    bl_idname = 'object.copy_as_mesh'
+    bl_label = 'MEME: Copy as Mesh'
+    bl_description = 'Copy Collection of Fonts as Meshes'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.mode == 'OBJECT'
+
+    def execute(self, context):
+        copy_as_mesh(self, context)
         return {'FINISHED'}
 
     def invoke(self, context, event):

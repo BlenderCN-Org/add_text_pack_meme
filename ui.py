@@ -16,4 +16,5 @@ class VIEW3D_MT_meme_menu(Menu):
         layout = self.layout
         col = layout.column()
         col.operator('object.add_texts')
+        col.operator('object.copy_as_mesh')
         col.operator('object.pack_meme')
